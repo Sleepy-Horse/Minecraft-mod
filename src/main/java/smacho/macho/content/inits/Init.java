@@ -11,6 +11,12 @@ public class Init {
         // Registers entity types
         EntityTypeInit.register(bus);
 
+        //Registers effects
+        EffectInit.register(bus);
+
+        //Registers potions
+        PotionInit.register(bus);
+
         // Registers renders
         bus.register(RenderInit.class);
     }
