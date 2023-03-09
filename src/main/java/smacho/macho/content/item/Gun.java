@@ -1,11 +1,6 @@
 package smacho.macho.content.item;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
-
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,13 +10,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-
 import org.jetbrains.annotations.NotNull;
-
 import smacho.macho.content.customProperties.GunProperties;
 import smacho.macho.content.entity.BulletEntity;
 import smacho.macho.content.inits.EntityTypeInit;
 import smacho.macho.content.inits.ItemInit;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class Gun extends ProjectileWeaponItem {
     // Gun properties
@@ -33,6 +31,9 @@ public class Gun extends ProjectileWeaponItem {
     private final Item[] supportedProjectiles;
     private final float hSpread;
     private final float vSpread;
+    private final SoundEvent reloadSound;
+    private final SoundEvent shotSound;
+    private final SoundEvent failedReloadSound;
 
     // List of bullets left in the gun
     public final List<Bullet> bullets_left = new ArrayList<>();
@@ -52,6 +53,9 @@ public class Gun extends ProjectileWeaponItem {
         this.maxAmmo = gunProperties.getMaxAmmo();
         this.hSpread = gunProperties.getHorizontalSpread();
         this.vSpread = gunProperties.getVerticalSpread();
+        this.reloadSound = gunProperties.getReloadSound();
+        this.shotSound = gunProperties.getShotSound();
+        this.failedReloadSound = gunProperties.getFailedReloadSound();
     }
 
 
@@ -60,10 +64,10 @@ public class Gun extends ProjectileWeaponItem {
         ItemStack itemStack = player.getItemInHand(hand);
 
         // Check if enough time has passed since last shot and if there are any bullets left to fire
-        long time_since_last_shot = level.getGameTime() - last_time_shot;
+        long time_since_last_shot = level.getGameTime  () - last_time_shot;
         if (time_since_last_shot >= fireRate && !bullets_left.isEmpty())
             // Play a sound effect to indicate that gun shot
-            player.playSound(SoundEvents.BLAZE_SHOOT);
+            player.playSound(this.shotSound);
         if (time_since_last_shot >= fireRate && !bullets_left.isEmpty() && !level.isClientSide()) {
             // Stop using the item and shoot the gun
             player.stopUsingItem();
@@ -112,7 +116,7 @@ public class Gun extends ProjectileWeaponItem {
             if (Arrays.asList(supportedProjectiles).contains(itemStack.getItem()) && !level.isClientSide()) {
                 // If the gun is already fully loaded, play a sound effect and return
                 if (bullets_left.size() >= maxAmmo) {
-                    player.playSound(SoundEvents.LEVER_CLICK);
+                    player.playSound(reloadSound);
                     return;
                 }
                 // Subtract one from the item stack and add it to the gun's bullets
@@ -130,11 +134,11 @@ public class Gun extends ProjectileWeaponItem {
                 bullets_left.add((Bullet) ItemInit.BULLET.get());
             }
             // Play a sound effect to indicate that the gun has been reloaded
-            player.playSound(SoundEvents.LEVER_CLICK);
+            player.playSound(reloadSound);
             return;
         }
         // Play a sound effect to indicate that the gun hasn't been reloaded
-        player.playSound(SoundEvents.FLINTANDSTEEL_USE);
+        player.playSound(failedReloadSound);
     }
 
     /**
