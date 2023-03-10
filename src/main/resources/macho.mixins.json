@@ -1,0 +1,8 @@
+{
+  "compatibilityLevel": "JAVA_17",
+  "package": "smacho.macho.content.mixins",
+  "refmap": "refmap.example.json",
+  "mixins": [],
+  "client": ["RenderMixins"],
+  "server": []
+}
